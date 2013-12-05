@@ -7,4 +7,5 @@
                  [ring/ring-core "1.1.7"]
                  [http-kit "2.1.12"]
                  [torpo "0.1-SNAPSHOT"]]
-  :profiles {:dev {:dependencies [[midje "1.5.0"]]}})
+  :profiles {:dev {:dependencies [[midje "1.5.0"]]}}
+  :scm {:name "git" :url "https://github.com/molst/shaky"})
