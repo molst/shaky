@@ -51,8 +51,10 @@
       (pl/throw-str (str "Error requesting from '" (uri/make-uri-str uri) "': " e)))
     (do-with-body-f res)))
 
+#+clj
 (defn block-request! "Reads data from 'uri'."
   [uri] (blocking-request-helper! uri raw-body))
 
+#+clj
 (defn block-read! "Reads the first clojure object from 'uri'."
   [uri] (blocking-request-helper! uri read-body))
