@@ -29,6 +29,7 @@
                    :body (.getResponseText t)}))))
 
 (defn request! [uri callback]
+  (println "prp: " (options (uri/prepare-for-transmission uri)))
   #+clj (http/request (options (uri/prepare-for-transmission uri)) callback)
   #+cljs (http/send (uri/make-uri-str (uri/prepare-for-transmission uri))
                     (httpkit-to-goog-xhrio-callback callback)
