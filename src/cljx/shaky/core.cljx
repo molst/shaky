@@ -1,5 +1,6 @@
 (ns shaky.core
-  (:require [ring.util.response :as ringres]))
+  (:require [torpo.uri :as uri]
+            [ring.util.response :as ringres]))
 
 (defn get-param "Gets a parameter by first looking among query params and form params, then in cookies."
   [param-key req]

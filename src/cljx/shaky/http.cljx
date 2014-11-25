@@ -1,8 +1,10 @@
 (ns shaky.http
-  (:require [org.httpkit.client :as http])
-  (:require [ring.util.codec :as rinc])
-  (:require [torpo.core :as torpo])
-  (:require [torpo.uri :as uri]))
+  (:require [torpo.core :as torpo]
+            [torpo.uri :as uri]
+            [torpo.platform :as pl]
+            #+clj  [ring.util.codec :as rinc]
+            #+clj  [org.httpkit.client :as http]
+            #+cljs [goog.net.XhrIo :as http]))
 
 (defn options
   "Transforms a 'base-request' on the form {:hostname \"svt.se\" :port 1234 :scheme \"http\" :path [\"member\" \"steven\"] :params {:token 1234}} to a httpkit request map."
@@ -15,12 +17,23 @@
       :url (uri/make-uri-str (dissoc base-uri :params))}
      {:url (uri/make-uri-str base-uri)})))
 
-(defn prepare-for-transmission [uri] (update-in uri [:params] (fn [old-val] (torpo/doto-vals (case (:request-method uri) :get rinc/url-encode :post str) (:params uri)))))
+(defn read-body [{body :body}]
+  (when body #+clj  (read (java.io.PushbackReader. (clojure.java.io/reader body)))
+             #+cljs (pl/debuglog (str "read-body not supported for clojurescript, see shaky.http"))))
 
-(defn block-read! "Reads the first clojure object from 'uri'." [uri]
-  (let [options (options (prepare-for-transmission uri))
-        {:keys [body] :as response} @(http/request options nil)
-        ;;first-value (if body (read-string body)) ;;if body was text this would be fine
-        first-value (if body (read (java.io.PushbackReader. (clojure.java.io/reader body))))]
-    first-value))
+(defn httpkit-to-goog-xhrio-callback "Returns a function that takes a http-kit style request result argument and produces a goog xhrio callback function."
+  [httpkit-cb]
+  (fn [event]
+    (let [t (-> event .-target)]
+      (httpkit-cb {:status (.getStatus t)
+                   :body (.getResponseText t)}))))
 
+(defn request! [uri callback]
+  #+clj (http/request (options (uri/prepare-for-transmission uri)) callback)
+  #+cljs (http/send (uri/make-uri-str (uri/prepare-for-transmission uri))
+                    (httpkit-to-goog-xhrio-callback callback)
+                    (case (:request-method uri) :post "POST" "GET")))
+
+#+clj ;;not tested in js engine
+(defn block-read! "Reads the first clojure object from 'uri'."
+  [uri] (read-body @(request! uri nil)))

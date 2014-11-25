@@ -17,5 +17,4 @@
                   {:source-paths ["src/cljx"]
                    :output-path "target/classes"
                    :rules :cljs}]}
-  :hooks [cljx.hooks]
-  :profiles {:dev {:dependencies [[midje "1.5.0"]]}})
+  :hooks [cljx.hooks])
