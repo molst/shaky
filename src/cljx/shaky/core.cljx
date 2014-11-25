@@ -29,7 +29,7 @@
     (ringres/status {:body (str (apply (partial error-body message) tags))} (first integers))))
 
 (defn parse-request-params [params]
-  (apply merge (for [[param-key param-val] params :when param-val :let [read-val (read-string param-val)]]
+  (apply merge (for [[param-key param-val] params :when param-val :let [read-val (read-string param-val)]] ;;we do not decode here, as that part is usually done by ring middleare
                  {(keyword param-key) read-val})))
 
 (defn take-ring-params "Takes all params from 'ring-req', assumes all params are clojure strings, and returns a map with keywords to read values."

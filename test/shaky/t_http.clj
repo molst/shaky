@@ -19,5 +19,5 @@
 (deftest get-keyword-param "A keyword supplied over the API can be read back."
   (is (= :b (http/block-read! {:scheme "http" :hostname "localhost" :port 4499 :path ["get-param"] :params {:a :b}}))))
 
-(deftest get-string-param-as-str "Make sure the raw string-wrapped parameter can be read back untouched."
-  (is (= "\"1\"" (http/block-request! {:scheme "http" :hostname "localhost" :port 4499 :path ["get-paramZZZ"] :params {:a "1"}}))))
+#_(deftest get-string-param-as-str "Make sure the raw string-wrapped parameter can be read back untouched."
+  (is (thrown? Exception (http/block-request! {:scheme "http" :hostname "localhost" :port 4499 :path ["no-path-for-me"] :params {:a "1"}}))))
