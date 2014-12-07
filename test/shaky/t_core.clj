@@ -5,9 +5,6 @@
 
 (deftest parse-request-params (is (= {:a [:vk "string"]} (core/parse-request-params {:a "[:vk \"string\"]"}))))
 
-(deftest parse-prepared-params "should lead to same result as for parse-request-params"
-  (is (= {:a [:vk "string"]} (core/parse-request-params (:params (uri/prepare-for-transmission {:params {:a [:vk "string"]}}))))))
-
 (deftest prepare-get-params-for-transmission
   (is (= {:a "%5B%3Avk%20%22string%22%5D"}
          (:params                            (uri/prepare-for-transmission {:params {:a [:vk "string"]}})))))

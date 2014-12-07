@@ -6,16 +6,19 @@
             #+clj  [org.httpkit.client :as http]
             #+cljs [goog.net.XhrIo :as http]))
 
-(defn- options
+(defn- form-param-split [uri]
+  (if (= :post (:request-method uri))
+    {:form-params (:params uri)
+     :url (uri/make-uri-str (dissoc uri :params))}
+    {:url (uri/make-uri-str uri)}))
+
+(defn- httpkit-options
   "Transforms a 'base-request' on the form {:hostname \"svt.se\" :port 1234 :scheme \"http\" :path [\"member\" \"steven\"] :params {:token 1234}} to a httpkit request map."
-  [{:keys [request-method] :as base-uri}]
+  [{:keys [request-method] :as uri}]
   (merge
    #_{:as :text} ;;this would require read-string in read-body (below)
    (when request-method {:method request-method})
-   (if (= :post request-method)
-     {:form-params (:params base-uri)
-      :url (uri/make-uri-str (dissoc base-uri :params))}
-     {:url (uri/make-uri-str base-uri)})))
+   (form-param-split uri)))
 
 (defn raw-body [{body :body}]
   (try
@@ -39,10 +42,18 @@
                    :body (.getResponseText t)}))))
 
 (defn request! [uri callback]
-  #+clj (http/request (options (uri/prepare-for-transmission uri)) callback)
-  #+cljs (http/send (uri/make-uri-str (uri/prepare-for-transmission uri))
-                    (httpkit-to-goog-xhrio-callback callback)
-                    (case (:request-method uri) :post "POST" "GET")))
+  #+clj (http/request (httpkit-options (uri/prepare-for-transmission uri)) callback)
+  #+cljs (if (= :post (:request-method uri))
+           (let [{:keys [url form-params]} (form-param-split uri)]
+             (.log js/console "url: " url " form-params: " (pr-str form-params))
+             (http/send url
+                        (httpkit-to-goog-xhrio-callback callback)
+                        "POST"
+                        (pr-str form-params)
+                        (clj->js {"Content-Type" "text/plain"})))
+           (http/send (uri/make-uri-str uri)
+                      (httpkit-to-goog-xhrio-callback callback)
+                      "GET")))
 
 #+clj ;;not tested in js engine yet
 (defn- blocking-request-helper! [uri do-with-body-f]

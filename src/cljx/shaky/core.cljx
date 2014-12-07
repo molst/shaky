@@ -1,5 +1,6 @@
 (ns shaky.core
-  (:require [torpo.uri :as uri]
+  (:require [clojure.edn :as edn]
+            [torpo.uri :as uri]
             [ring.util.response :as ringres]))
 
 (defn get-param "Gets a parameter by first looking among query params and form params, then in cookies."
@@ -15,7 +16,7 @@
 (defn read-param "Gets a parameter by first looking among query params and form params, then in cookies."
   [param-name req]
   (when-let [param (get-param param-name req)]
-    (read-string param)))
+    (edn/read-string param)))
 
 (defn make-validation-error-response [validation-errors]
   (ringres/status {:body (str {:validation-errors validation-errors})} 400)) ;;TODO: Change this to look like error-body (below)
@@ -29,7 +30,7 @@
     (ringres/status {:body (str (apply (partial error-body message) tags))} (first integers))))
 
 (defn parse-request-params [params]
-  (apply merge (for [[param-key param-val] params :when param-val :let [read-val (read-string param-val)]] ;;we do not decode here, as that part is usually done by ring middleare
+  (apply merge (for [[param-key param-val] params :when param-val :let [read-val (edn/read-string param-val)]] ;;we do not decode here, as that part is usually done by ring middleware
                  {(keyword param-key) read-val})))
 
 (defn take-ring-params "Takes all params from 'ring-req', assumes all params are clojure strings, and returns a map with keywords to read values."
