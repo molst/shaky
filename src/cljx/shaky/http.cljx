@@ -45,7 +45,6 @@
   #+clj (http/request (httpkit-options (uri/prepare-for-transmission uri)) callback)
   #+cljs (if (= :post (:request-method uri))
            (let [{:keys [url form-params]} (form-param-split uri)]
-             (.log js/console "url: " url " form-params: " (pr-str form-params))
              (http/send url
                         (httpkit-to-goog-xhrio-callback callback)
                         "POST"
