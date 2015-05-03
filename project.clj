@@ -7,7 +7,7 @@
   :scm {:name "git" :url "https://github.com/molst/shaky"}
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [net.cgrand/moustache "1.1.0" :exclusions [org.clojure/clojure ring/ring-core]]
-                 [torpo "0.2-SNAPSHOT" :exclusions [org.clojure/clojure]]
+                 [torpo "0.5.0-SNAPSHOT" :exclusions [org.clojure/clojure]]
                  [pisto "0.2-SNAPSHOT"]
                  [ring "1.3.1"]
                  [http-kit "2.1.16"]]
